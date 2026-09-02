@@ -1,4 +1,5 @@
 from pathlib import Path
+from urllib.request import urlretrieve
 
 from flask import Flask, jsonify, render_template, request
 import joblib
@@ -7,17 +8,23 @@ import pandas as pd
 
 APP_DIR = Path(__file__).resolve().parent
 BUNDLE_PATH = APP_DIR / "hypoglycemia_calculator_bundle.joblib"
+MODEL_URL = (
+    "https://raw.githubusercontent.com/"
+    "lidongpeng35-lang/hypoglycemia-risk-calculator/main/"
+    "hypoglycemia_calculator_bundle.joblib"
+)
 
 app = Flask(__name__)
 
 
-def load_bundle():
+def ensure_bundle():
     if not BUNDLE_PATH.exists():
-        raise FileNotFoundError(
-            "Missing hypoglycemia_calculator_bundle.joblib. "
-            "Place the model bundle next to app.py."
-        )
-    return joblib.load(BUNDLE_PATH)
+        urlretrieve(MODEL_URL, BUNDLE_PATH)
+    return BUNDLE_PATH
+
+
+def load_bundle():
+    return joblib.load(ensure_bundle())
 
 
 bundle = load_bundle()
