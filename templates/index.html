@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ICU低血糖风险动态预测工具</title>
+<style>
+:root{--navy:#17364f;--blue:#2f6f9f;--bg:#f3f7fa;--line:#dce6ed;--text:#22313f;--muted:#71808c;--safe:#2f8066;--danger:#c64c4c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 88% 4%,rgba(76,141,182,.11),transparent 29rem),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif}
+.page{max-width:1400px;margin:0 auto;padding:22px}.hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#17364f 0%,#245f86 58%,#4d8db5 100%);border-radius:22px;padding:30px 34px;color:#fff;margin-bottom:20px;box-shadow:0 15px 38px rgba(28,64,90,.15)}
+.hero:after{content:"";position:absolute;width:270px;height:270px;right:-80px;top:-125px;border:40px solid rgba(255,255,255,.07);border-radius:50%}.kicker{font-size:12px;letter-spacing:.12em;font-weight:800;opacity:.72}h1{font-size:32px;line-height:1.25;margin:8px 0 7px}.hero p{margin:0;max-width:900px;line-height:1.75;font-size:14px;opacity:.88}
+.main-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(430px,1fr);gap:22px;align-items:start}.card{background:rgba(255,255,255,.98);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(28,64,90,.07)}.form-card{padding:22px}.result-card{padding:27px 28px 24px;position:sticky;top:18px;min-height:650px}
+.section-head{display:flex;align-items:center;gap:9px;margin-bottom:3px}.section-num{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#eaf3f8;color:var(--blue);font-size:11px;font-weight:900}.section-title{color:var(--navy);font-size:16px;font-weight:800}.section-note{color:var(--muted);font-size:12px;line-height:1.6;margin:2px 0 12px 37px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{border:1px solid #e3ebf0;background:#fbfdfe;border-radius:12px;padding:11px 12px}.field.full{grid-column:1/-1}.field label{display:block;color:#516472;font-size:12px;font-weight:750;margin-bottom:7px}.field input,.field select{width:100%;border:0;outline:0;background:transparent;color:var(--navy);font-size:15px;font-family:inherit}.field input:disabled{opacity:.4}.divider{border:0;border-top:1px solid #e8eef2;margin:21px 0}
+.eyebrow{color:var(--blue);font-size:11px;font-weight:900;letter-spacing:.13em}h2{font-size:22px;color:var(--navy);margin:6px 0 4px}.result-sub{color:var(--muted);font-size:12px;line-height:1.6}.risk-wrap{display:grid;place-items:center;position:relative;margin:28px 0 16px}.ring{--angle:0deg;--ring:#3c7da6;width:250px;height:250px;border-radius:50%;background:conic-gradient(var(--ring) 0 var(--angle),#e8eef2 var(--angle) 360deg);display:grid;place-items:center;transition:.25s ease}.ring:after{content:"";width:184px;height:184px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #edf2f5}.risk-center{position:absolute;text-align:center}.risk-center span{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}.risk-center strong{display:block;color:var(--navy);font-size:40px;line-height:1;font-weight:800}.status{text-align:center;font-size:17px;font-weight:800;color:var(--safe);margin-top:5px}.threshold{text-align:center;color:var(--muted);font-size:12px;line-height:1.7;margin-top:7px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:24px}.stat{background:#f7fafc;border:1px solid #e4ebf0;border-radius:12px;padding:13px 8px;text-align:center}.stat b{display:block;color:var(--navy);font-size:15px;margin-bottom:3px}.stat span{color:var(--muted);font-size:11px}.notice{margin-top:20px;background:#f6f9fb;border-left:4px solid #9db0be;border-radius:8px;padding:12px 14px;color:#657784;font-size:12px;line-height:1.7}.model-line{text-align:center;color:#87949e;font-size:11px;line-height:1.6;margin-top:13px}.loading{opacity:.55}.error{display:none;margin-top:14px;background:#fff0f0;color:#a93939;border:1px solid #f0caca;border-radius:9px;padding:10px 12px;font-size:12px}details{margin-top:16px;border-top:1px solid #e8eef2;padding-top:14px}summary{cursor:pointer;color:var(--blue);font-size:12px;font-weight:750}.inputs-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}.inputs-table th,.inputs-table td{border-bottom:1px solid #edf1f4;padding:7px;text-align:left}.inputs-table th{color:#5f7180}
+@media(max-width:980px){.main-grid{grid-template-columns:1fr}.result-card{position:static}}@media(max-width:620px){.page{padding:12px}.hero{padding:22px;border-radius:16px}h1{font-size:25px}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+<section class="hero"><div class="kicker">DYNAMIC LANDMARK PREDICTION · RESEARCH PROTOTYPE</div><h1>ICU低血糖风险动态预测工具</h1><p>基于当前 Landmark 时点的临床信息，动态估计患者未来 6 小时发生低血糖的风险。预测结果由真实模型实时计算。</p></section>
+<main class="main-grid">
+<section class="card form-card">
+<div class="section"><div class="section-head"><div class="section-num">01</div><div class="section-title">Landmark 与基础信息</div></div><div class="section-note">Landmark 为 ICU 入科后的动态预测时点，可按小时重复更新。</div><div class="fields">
+<div class="field"><label>ICU时间 / Landmark时点（h）</label><input id="landmark_hour" type="number" min="0" step="1" value="{{ defaults.landmark_hour }}"></div>
+<div class="field"><label>既往是否有糖尿病</label><select id="diabetes"><option value="0">否</option><option value="1">是</option></select></div>
+<div class="field full"><label>体重（kg）</label><input id="weight_kg" type="number" min="30" max="180" step="1" value="{{ defaults.weight_kg }}"></div></div></div>
+<hr class="divider">
+<div class="section"><div class="section-head"><div class="section-num">02</div><div class="section-title">过去 6 小时血糖与治疗信息</div></div><div class="section-note">若无血糖测量，相关血糖变量将按原模型缺失值流程处理。</div><div class="fields">
+<div class="field full"><label>过去6小时是否无血糖测量</label><select id="no_glu_6h"><option value="0">否</option><option value="1">是</option></select></div>
+<div class="field"><label>最低血糖（mg/dL）</label><input id="glu_min_6h" type="number" min="30" max="350" step="1" value="{{ defaults.glu_min_6h }}"></div>
+<div class="field"><label>最近一次血糖（mg/dL）</label><input id="glu_last_6h" type="number" min="30" max="400" step="1" value="{{ defaults.glu_last_6h }}"></div>
+<div class="field"><label>血糖变异系数（CV）</label><input id="glu_cv_6h" type="number" min="0" max="1.5" step="0.01" value="{{ defaults.glu_cv_6h }}"></div>
+<div class="field"><label>过去6小时胰岛素总剂量（U）</label><input id="insulin_units_6h" type="number" min="0" max="100" step="1" value="{{ defaults.insulin_units_6h }}"></div></div></div>
+<hr class="divider">
+<div class="section"><div class="section-head"><div class="section-num">03</div><div class="section-title">疾病严重程度与实验室指标</div></div><div class="section-note">实验室指标沿用原研究定义的过去 24 小时最近值。</div><div class="fields">
+<div class="field"><label>SOFA评分</label><input id="sofa_score" type="number" min="0" max="24" step="1" value="{{ defaults.sofa_score }}"></div>
+<div class="field"><label>肌酐（mg/dL）</label><input id="creatinine_last_24h" type="number" min="0" max="15" step="0.1" value="{{ defaults.creatinine_last_24h }}"></div>
+<div class="field full"><label>碱剩余（mmol/L）</label><input id="base_excess_last_24h" type="number" min="-25" max="20" step="0.5" value="{{ defaults.base_excess_last_24h }}"></div></div></div>
+</section>
+<aside class="card result-card" id="resultCard"><div class="eyebrow">PREDICTED RISK</div><h2>未来 6 小时低血糖预测风险</h2><div class="result-sub">修改左侧任意输入后，网页将调用 Python 后端中的真实模型并自动刷新。</div>
+<div class="risk-wrap"><div class="ring" id="ring"></div><div class="risk-center"><span>预测概率</span><strong id="riskPct">--</strong></div></div>
+<div class="status" id="riskStatus">正在计算…</div><div class="threshold">模型预警阈值：<b id="thresholdPct">{{ "%.2f"|format(threshold * 100) }}%</b></div>
+<div class="stats"><div class="stat"><b>6 小时</b><span>预测时间窗</span></div><div class="stat"><b id="landmarkShow">-- h</b><span>当前 Landmark</span></div><div class="stat"><b>真实模型</b><span>实时 predict_proba()</span></div></div>
+<div class="notice"><b>研究用途声明：</b>本工具为研究模型的网页原型，仅用于科研展示、模型解释与学术交流；不能替代临床判断，也不应作为独立诊疗决策工具。</div><div class="model-line">特征顺序 → 中位数插补 → 标准化 → 校准后的 LightGBM → predict_proba()</div><div class="error" id="errorBox"></div>
+<details><summary>查看本次提交的 11 个模型变量</summary><table class="inputs-table" id="inputTable"></table></details></aside>
+</main></div>
+<script>
+const ids=["base_excess_last_24h","creatinine_last_24h","diabetes","glu_cv_6h","glu_last_6h","glu_min_6h","insulin_units_6h","landmark_hour","no_glu_6h","sofa_score","weight_kg"];
+const labels={base_excess_last_24h:"碱剩余（过去24小时最近值）",creatinine_last_24h:"肌酐（过去24小时最近值）",diabetes:"糖尿病",glu_cv_6h:"血糖变异系数（过去6小时）",glu_last_6h:"最近一次血糖（过去6小时）",glu_min_6h:"最低血糖（过去6小时）",insulin_units_6h:"胰岛素总剂量（过去6小时）",landmark_hour:"ICU时间 / Landmark时点",no_glu_6h:"过去6小时无血糖测量",sofa_score:"SOFA评分",weight_kg:"体重"};
+let timer=null;function value(id){return Number(document.getElementById(id).value)}function payload(){const p={};ids.forEach(id=>p[id]=value(id));return p}
+function updateNoGlucoseUI(){const disabled=document.getElementById("no_glu_6h").value==="1";["glu_min_6h","glu_last_6h","glu_cv_6h"].forEach(id=>document.getElementById(id).disabled=disabled)}
+function renderInputTable(p){let html="<tr><th>变量</th><th>值</th></tr>";ids.forEach(id=>{let v=p[id];if(id==="diabetes"||id==="no_glu_6h")v=v?"是":"否";if(p.no_glu_6h&&["glu_min_6h","glu_last_6h","glu_cv_6h"].includes(id))v="缺失 / 插补";html+=`<tr><td>${labels[id]}</td><td>${v}</td></tr>`});document.getElementById("inputTable").innerHTML=html}
+async function predict(){updateNoGlucoseUI();const p=payload();renderInputTable(p);const card=document.getElementById("resultCard"),errorBox=document.getElementById("errorBox");card.classList.add("loading");errorBox.style.display="none";try{const res=await fetch("/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});if(!res.ok)throw new Error(await res.text());const data=await res.json();const pct=data.probability_pct;document.getElementById("riskPct").textContent=pct.toFixed(2)+"%";document.getElementById("thresholdPct").textContent=data.threshold_pct.toFixed(2)+"%";document.getElementById("landmarkShow").textContent=Number(data.landmark_hour).toFixed(0)+" h";const ring=document.getElementById("ring");ring.style.setProperty("--angle",(Math.max(0,Math.min(100,pct))*3.6).toFixed(2)+"deg");const status=document.getElementById("riskStatus");if(data.high_risk){status.textContent="达到高风险预警阈值";status.style.color="#c64c4c";ring.style.setProperty("--ring","#d45a5a")}else{status.textContent="低于高风险预警阈值";status.style.color="#2f8066";ring.style.setProperty("--ring","#3c7da6")}}catch(err){document.getElementById("riskPct").textContent="--";document.getElementById("riskStatus").textContent="预测失败";errorBox.textContent="无法获得模型预测："+err.message;errorBox.style.display="block"}finally{card.classList.remove("loading")}}
+function schedulePredict(){clearTimeout(timer);timer=setTimeout(predict,180)}document.querySelectorAll("input,select").forEach(el=>{el.addEventListener("input",schedulePredict);el.addEventListener("change",schedulePredict)});updateNoGlucoseUI();predict();
+</script>
+</body>
+</html>
