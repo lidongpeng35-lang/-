@@ -1,13 +1,11 @@
 # Hypoglycemia Risk Calculator — HTML Version
 
-This is a separate repository for the HTML version of the dynamic 6-hour ICU hypoglycemia risk calculator.
+This is a separate repository for the HTML version of the dynamic 6-hour ICU hypoglycemia risk calculator. The original Streamlit repository remains unchanged.
 
 ## Structure
 
 ```text
-hypoglycemia-risk-calculator-html/
 ├── app.py
-├── hypoglycemia_calculator_bundle.joblib
 ├── requirements.txt
 ├── Procfile
 ├── .gitignore
@@ -15,9 +13,15 @@ hypoglycemia-risk-calculator-html/
     └── index.html
 ```
 
-## Prediction pipeline
+## Model source
 
-The model pipeline is kept consistent with the original project:
+The HTML project uses the same model bundle as the original public repository. On startup, `app.py` checks for `hypoglycemia_calculator_bundle.joblib`. If it is not present locally, the app downloads and caches the model from:
+
+`lidongpeng35-lang/hypoglycemia-risk-calculator`
+
+No substitute or demonstration risk formula is used.
+
+## Prediction pipeline
 
 ```text
 11 model features
@@ -28,7 +32,7 @@ The model pipeline is kept consistent with the original project:
 → 6-hour hypoglycemia risk
 ```
 
-`index.html` does not contain a substitute/demo risk formula. It sends inputs to `/predict`, and the displayed probability is returned by `hypoglycemia_calculator_bundle.joblib`.
+The browser sends the entered values to `/predict`, and the displayed probability is returned by the Python model backend.
 
 ## Local run
 
